@@ -1,0 +1,4 @@
+machine
+mielage
+person
+serial_number

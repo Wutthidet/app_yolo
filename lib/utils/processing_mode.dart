@@ -1,0 +1,1 @@
+enum ProcessingMode { local, ocr, api }
