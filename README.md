@@ -46,7 +46,7 @@ Follow these instructions to get a copy of the project up and running on your lo
 
 1.  **Clone the repository:**
     ```sh
-    git clone https://github.com/Wutthidet/app_yolo.git
+    git clone https://github.com/your-username/app_yolo.git
     cd app_yolo
     ```
     *(Replace `your-username` with your actual GitHub username)*
