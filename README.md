@@ -102,8 +102,4 @@ lib/
 └── widgets/        # Reusable UI components.
 ```
 
-For a deep dive into the technical implementation of YOLOv8 in this project, please refer to the [**YOLO Implementation Guide**](./YOLO_IMPLEMENTATION_GUIDE.md).
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+For a deep dive into the technical implementation of YOLOv8 in this project, please refer to the [**YOLO Implementation Guide**](./YOLO_IMPLEMENTATION_GUIDE.md)
