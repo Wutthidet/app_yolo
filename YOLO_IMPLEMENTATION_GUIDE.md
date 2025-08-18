@@ -368,3 +368,40 @@ class _RealTimeScreenState extends State<RealTimeScreen> {
 -   **ปัญหา: Memory Leak หรือแอปช้าลงเรื่อยๆ**
     -   **สาเหตุ**: ลืมเรียก `_cameraController.dispose()` หรือ `YoloService.dispose()` ใน `dispose` method ของ `StatefulWidget` ทำให้ทรัพยากรไม่ถูกคืนสู่ระบบ
     -   **วิธีแก้**: ตรวจสอบ Lifecycle ของ Widget และ Controller ทั้งหมดให้แน่ใจว่ามีการ `dispose` อย่างถูกต้องเสมอ
+
+---
+
+### **8. โครงสร้างผลลัพธ์ของโมเดล (Model Output Structure)**
+
+เมื่อเรียกใช้ฟังก์ชัน `YoloService.detectObjects()` หรือ `_vision.yoloOnFrame()` ผลลัพธ์ที่ได้จะเป็น `List<Map<String, dynamic>>` โดยแต่ละ `Map` ใน List จะแทนวัตถุหนึ่งชิ้นที่ตรวจพบ และมีโครงสร้างดังนี้:
+
+![ตัวอย่างผลลัพธ์](https://img2.pic.in.th/pic/image35c351e8a9557394.png)
+
+```json
+[
+  {
+    "box": [110.5, 220.1, 85.3, 150.8],
+    "tag": "serial_number",
+    "confidence": 0.92
+  }
+]
+```
+
+#### **คำอธิบายแต่ละ Key:**
+
+-   **`box`** (`List<double>`):
+    -   เป็น List ที่มี 4 ค่า สำหรับกำหนดตำแหน่งและขนาดของ Bounding Box
+    -   `box[0]`: พิกัดแกน **X** (แนวนอน) ของมุมบนซ้ายของ Box
+    -   `box[1]`: พิกัดแกน **Y** (แนวตั้ง) ของมุมบนซ้ายของ Box
+    -   `box[2]`: **ความกว้าง** (Width) ของ Box
+    -   `box[3]`: **ความสูง** (Height) ของ Box
+    -   *หมายเหตุ: ค่าทั้งหมดนี้เป็นค่าดิบ (raw coordinates) ที่สัมพันธ์กับขนาดของภาพที่ส่งเข้าไปประมวลผล ไม่ใช่ขนาดของหน้าจอ*
+
+-   **`tag`** (`String`):
+    -   ชื่อคลาสของวัตถุที่ตรวจพบ ซึ่งจะตรงกับชื่อที่อยู่ในไฟล์ `labels.txt`
+    -   ตัวอย่าง: `"machine"`, `"person"`, `"serial_number"`
+
+-   **`confidence`** (`double`):
+    -   ค่าความมั่นใจของโมเดลว่าวัตถุที่ตรวจพบนั้นถูกต้อง
+    -   มีค่าอยู่ระหว่าง `0.0` ถึง `1.0`
+    -   ค่านี้จะถูกนำไปเปรียบเทียบกับ `confThreshold` ที่เราตั้งค่าไว้ก่อนที่จะแสดงผล
