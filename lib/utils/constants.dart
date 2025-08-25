@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 class AppConstants {
   static const String appName = 'AI Detection';
   static const String apiDetectAndOcrUrl =
-      'https://ampolfood.ddns.net/detect_and_ocr';
-  static const String apiLoginUrl = 'https://ampolfood.ddns.net/login';
+      'https://ampolfood.ddns.net/api/detect_and_ocr';
+  static const String apiLoginUrl = 'https://ampolfood.ddns.net/api/login';
 
   static const Color primaryColor = Color(0xFF6366F1);
   static const Color secondaryColor = Color(0xFF8B5CF6);

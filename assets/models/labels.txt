@@ -1,4 +1,5 @@
 machine
 mielage
 person
+remore_control
 serial_number
