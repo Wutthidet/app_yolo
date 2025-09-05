@@ -1,5 +1,5 @@
 machine
-mielage
+mileage
 person
 remore_control
 serial_number
