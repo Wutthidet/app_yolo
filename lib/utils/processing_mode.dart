@@ -1,1 +1,1 @@
-enum ProcessingMode { local, ocr, api }
+enum ProcessingMode { local, ocr, api, apiGpu, modelComparison, localInt8, localFloat16, localFloat32 }

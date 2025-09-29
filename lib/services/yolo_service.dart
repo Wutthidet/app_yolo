@@ -14,19 +14,60 @@ class YoloService {
   static final Random _random = Random();
   static final Map<String, Color> _colorMap = {};
 
-  static Future<bool> initialize() async {
+  static Future<bool> initialize({String? modelType}) async {
+    await dispose();
+
     if (_isInitialized) return true;
 
     try {
       _vision = FlutterVision();
-      await _vision!.loadYoloModel(
-        labels: 'assets/models/labels.txt',
-        modelPath: 'assets/models/best_float32.tflite',
-        modelVersion: "yolov8",
-        quantization: false,
-        numThreads: 1,
-        useGpu: true,
-      );
+
+      String modelPath;
+      bool quantization;
+      bool useGpu;
+
+      switch (modelType) {
+        case 'int8':
+          modelPath = 'assets/models/best_int8.tflite';
+          quantization = true;
+          useGpu = false;
+          break;
+        case 'float16':
+          modelPath = 'assets/models/best_float16.tflite';
+          quantization = false;
+          useGpu = true;
+          break;
+        case 'float32':
+        default:
+          modelPath = 'assets/models/best_float32.tflite';
+          quantization = false;
+          useGpu = true;
+          break;
+      }
+
+      try {
+        await _vision!.loadYoloModel(
+          labels: 'assets/models/labels.txt',
+          modelPath: modelPath,
+          modelVersion: "yolov8",
+          quantization: quantization,
+          numThreads: 1,
+          useGpu: useGpu,
+        );
+      } catch (gpuError) {
+        if (useGpu) {
+          await _vision!.loadYoloModel(
+            labels: 'assets/models/labels.txt',
+            modelPath: modelPath,
+            modelVersion: "yolov8",
+            quantization: quantization,
+            numThreads: 4,
+            useGpu: false,
+          );
+        } else {
+          rethrow;
+        }
+      }
       _isInitialized = true;
       return true;
     } catch (e) {

@@ -32,4 +32,6 @@ flutter:
 
   assets:
   - assets/models/best_float32.tflite
+  - assets/models/best_float16.tflite
+  - assets/models/best_int8.tflite
   - assets/models/labels.txt

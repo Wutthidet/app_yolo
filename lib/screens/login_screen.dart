@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:app_yolo/screens/simple_camera_screen.dart';
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';

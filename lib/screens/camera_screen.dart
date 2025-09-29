@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:convert';
 import 'package:app_yolo/models/image_data.dart';
 import 'package:app_yolo/screens/api_preview_screen.dart';
@@ -116,7 +118,10 @@ class _CameraScreenState extends State<CameraScreen>
     Widget screen;
     switch (widget.processingMode) {
       case ProcessingMode.local:
-        screen = LocalPreviewScreen(imageData: imageData);
+      case ProcessingMode.localInt8:
+      case ProcessingMode.localFloat16:
+      case ProcessingMode.localFloat32:
+        screen = LocalPreviewScreen(imageData: imageData, processingMode: widget.processingMode);
         break;
       case ProcessingMode.ocr:
         screen = OcrPreviewScreen(imageData: imageData);
@@ -124,6 +129,12 @@ class _CameraScreenState extends State<CameraScreen>
       case ProcessingMode.api:
         screen = ApiPreviewScreen(imageData: imageData);
         break;
+      case ProcessingMode.apiGpu:
+        screen = ApiPreviewScreen(imageData: imageData, useGpu: true);
+        break;
+      case ProcessingMode.modelComparison:
+        Navigator.pop(context);
+        return;
     }
 
     Navigator.push(

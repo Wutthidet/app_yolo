@@ -1,346 +1,140 @@
 import 'package:app_yolo/models/image_data.dart';
 import 'package:app_yolo/screens/api_result_screen.dart';
 import 'package:app_yolo/services/api_service.dart';
-import 'package:app_yolo/widgets/preview_widgets.dart';
+import 'package:app_yolo/widgets/enhanced_preview_screen.dart';
 import 'package:flutter/material.dart';
 import '../utils/constants.dart';
-import '../widgets/loading_widget.dart';
 
 class ApiPreviewScreen extends StatefulWidget {
   final ImageData imageData;
+  final bool useGpu;
 
   const ApiPreviewScreen({
     super.key,
     required this.imageData,
+    this.useGpu = false,
   });
 
   @override
   State<ApiPreviewScreen> createState() => _ApiPreviewScreenState();
 }
 
-class _ApiPreviewScreenState extends State<ApiPreviewScreen>
-    with TickerProviderStateMixin {
+class _ApiPreviewScreenState extends State<ApiPreviewScreen> {
   bool _isProcessing = false;
-  bool _showProcessButton = true;
-  late AnimationController _fadeController;
-  late AnimationController _slideController;
-  late AnimationController _scaleController;
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _fadeController = AnimationController(
-      duration: const Duration(milliseconds: 1000),
-      vsync: this,
-    );
-
-    _slideController = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
-    );
-
-    _scaleController = AnimationController(
-      duration: const Duration(milliseconds: 600),
-      vsync: this,
-    );
-
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _fadeController, curve: Curves.easeOut),
-    );
-
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(
-        CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic));
-
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _scaleController, curve: Curves.elasticOut),
-    );
-
-    _fadeController.forward();
-    _slideController.forward();
-    _scaleController.forward();
-  }
 
   Future<void> _processImage() async {
     setState(() {
       _isProcessing = true;
     });
 
-    final result = await ApiService.detectAndOcr(widget.imageData.base64);
+    try {
+      final result = widget.useGpu
+          ? await ApiService.detectAndOcrGpu(widget.imageData.base64)
+          : await ApiService.detectAndOcr(widget.imageData.base64);
 
-    setState(() {
-      _isProcessing = false;
-    });
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+        });
 
-    if (result == null) {
-      _showErrorDialog('ไม่สามารถประมวลผลภาพผ่าน API ได้');
-      return;
-    }
-
-    if (mounted) {
-      Navigator.pushReplacement(
-        context,
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) =>
-              ApiResultScreen(
-            imageData: widget.imageData,
-            apiResult: result,
-            timestamp: DateTime.now(),
-          ),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(1.0, 0.0),
-                end: Offset.zero,
-              ).animate(CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeOutCubic,
-              )),
-              child: child,
-            );
-          },
-        ),
-      );
+        if (result != null) {
+          Navigator.pushReplacement(
+            context,
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  ApiResultScreen(
+                imageData: widget.imageData,
+                apiResult: result,
+                timestamp: DateTime.now(),
+              ),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                const begin = Offset(1.0, 0.0);
+                const end = Offset.zero;
+                const curve = Curves.easeOutCubic;
+                var tween = Tween(begin: begin, end: end)
+                    .chain(CurveTween(curve: curve));
+                return SlideTransition(
+                  position: animation.drive(tween),
+                  child: child,
+                );
+              },
+            ),
+          );
+        } else {
+          _showErrorDialog();
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+        });
+        _showErrorDialog();
+      }
     }
   }
 
-  void _showErrorDialog(String message) {
+  void _showErrorDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: AppConstants.modernBorderRadius,
-        ),
-        backgroundColor: AppConstants.glassSurfaceColor,
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppConstants.errorColor.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: AppConstants.modernBorderRadius,
+          ),
+          title: const Row(
+            children: [
+              Icon(
                 Icons.error_outline_rounded,
                 color: AppConstants.errorColor,
                 size: 24,
               ),
-            ),
-            const SizedBox(width: 12),
-            const Text(
-              'เกิดข้อผิดพลาด',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-          ],
-        ),
-        content: Text(
-          message,
-          style: const TextStyle(color: AppConstants.textSecondaryColor),
-        ),
-        actions: [
-          Container(
-            decoration: BoxDecoration(
-              gradient: AppConstants.primaryGradient,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: AppConstants.primaryColor.withOpacity(0.3),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: TextButton(
-              onPressed: () => Navigator.pop(context),
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
+              SizedBox(width: AppConstants.padding),
+              Text('เกิดข้อผิดพลาด'),
+            ],
+          ),
+          content: Text(
+            widget.useGpu
+                ? 'ไม่สามารถประมวลผลภาพผ่าน API GPU ได้\nกรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต'
+                : 'ไม่สามารถประมวลผลภาพผ่าน API ได้\nกรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
               child: const Text('ตกลง'),
             ),
-          ),
-        ],
-      ),
+          ],
+        );
+      },
     );
   }
 
-  @override
-  void dispose() {
-    _fadeController.dispose();
-    _slideController.dispose();
-    _scaleController.dispose();
-    super.dispose();
+  void _retakePhoto() {
+    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppConstants.backgroundColor,
-      body: Stack(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  AppConstants.primaryColor.withOpacity(0.05),
-                  AppConstants.backgroundColor,
-                  AppConstants.secondaryColor.withOpacity(0.03),
-                ],
-              ),
-            ),
-          ),
-          CustomScrollView(
-            physics: const BouncingScrollPhysics(),
-            slivers: [
-              SliverAppBar(
-                expandedHeight: 200,
-                floating: false,
-                pinned: true,
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                leading: Container(
-                  margin: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    gradient: AppConstants.glassMorphGradient,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.2),
-                      width: 1,
-                    ),
-                    boxShadow: [AppConstants.modernShadow],
-                  ),
-                  child: IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      color: AppConstants.textColor,
-                      size: 20,
-                    ),
-                  ),
-                ),
-                actions: [
-                  Container(
-                    margin: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      gradient: AppConstants.glassMorphGradient,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.2),
-                        width: 1,
-                      ),
-                      boxShadow: [AppConstants.modernShadow],
-                    ),
-                    child: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _showProcessButton = !_showProcessButton;
-                        });
-                      },
-                      icon: Icon(
-                        _showProcessButton
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                        color: AppConstants.textColor,
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                ],
-                flexibleSpace: FlexibleSpaceBar(
-                  title: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      gradient: AppConstants.primaryGradient,
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: [AppConstants.glassShadow],
-                    ),
-                    child: const Text(
-                      'ตรวจสอบรูปภาพ (API)',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                  centerTitle: true,
-                  background: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          AppConstants.primaryColor.withOpacity(0.1),
-                          Colors.transparent,
-                        ],
-                      ),
-                    ),
-                    child: Center(
-                      child: Icon(
-                        Icons.cloud_upload_rounded,
-                        size: 80,
-                        color: AppConstants.primaryColor.withOpacity(0.2),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: SlideTransition(
-                    position: _slideAnimation,
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppConstants.paddingLarge),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ScaleTransition(
-                            scale: _scaleAnimation,
-                            child: ImagePreviewCard(
-                              imageBytes: widget.imageData.bytes,
-                              headerGradient: AppConstants.primaryGradient,
-                            ),
-                          ),
-                          const SizedBox(height: AppConstants.paddingXLarge),
-                          const ProcessingInfoCard(
-                            title: 'ส่งเพื่อประมวลผล',
-                            description:
-                                'รูปภาพของคุณจะถูกส่งไปยังเซิร์ฟเวอร์เพื่อทำการวิเคราะห์และตรวจจับวัตถุพร้อมกับอ่านตัวอักษร',
-                          ),
-                          SizedBox(height: _showProcessButton ? 140 : 40),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          if (_showProcessButton)
-            PreviewBottomBar(
-              isProcessing: _isProcessing,
-              onProcess: _processImage,
-              onRetake: () => Navigator.pop(context),
-              processButtonText: 'ส่งวิเคราะห์',
-            ),
-          if (_isProcessing)
-            const LoadingWidget(message: 'กำลังส่งข้อมูลไปเซิร์ฟเวอร์...'),
-        ],
-      ),
+    return EnhancedPreviewScreen(
+      imageBytes: widget.imageData.bytes,
+      title: widget.useGpu ? 'API GPU Detection' : 'API CPU Detection',
+      subtitle: widget.useGpu
+          ? 'ประมวลผลด้วย GPU บนเซิร์ฟเวอร์'
+          : 'ประมวลผลด้วย CPU บนเซิร์ฟเวอร์',
+      icon: widget.useGpu ? Icons.rocket_launch_rounded : Icons.cloud_rounded,
+      gradient: widget.useGpu
+          ? const LinearGradient(
+              colors: [Colors.purple, Colors.purpleAccent],
+            )
+          : AppConstants.primaryGradient,
+      onProcess: _processImage,
+      onRetake: _retakePhoto,
+      isProcessing: _isProcessing,
+      processingText: widget.useGpu
+          ? 'กำลังประมวลผลด้วย GPU...'
+          : 'กำลังประมวลผลด้วย API...',
     );
   }
 }

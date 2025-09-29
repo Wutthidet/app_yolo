@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import '../services/yolo_service.dart';
@@ -439,15 +441,15 @@ class _RealTimeScreenState extends State<RealTimeScreen>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Row(
+                          const Row(
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.analytics_outlined,
                                 color: Colors.white,
                                 size: 20,
                               ),
-                              const SizedBox(width: 8),
-                              const Text(
+                              SizedBox(width: 8),
+                              Text(
                                 'Detection Stats',
                                 style: TextStyle(
                                   color: Colors.white,

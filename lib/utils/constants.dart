@@ -1,9 +1,13 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 
 class AppConstants {
   static const String appName = 'AI Detection';
   static const String apiDetectAndOcrUrl =
       'https://ampolfood.ddns.net/api/detect_and_ocr';
+  static const String apiDetectAndOcrGpuUrl =
+      'https://ampolfood.ddnsking.com/api/detect_and_ocr';
   static const String apiLoginUrl = 'https://ampolfood.ddns.net/api/login';
 
   static const Color primaryColor = Color(0xFF6366F1);
@@ -17,15 +21,12 @@ class AppConstants {
   static const Color successColor = Color(0xFF10B981);
 
   static const Color glassSurfaceColor = Color(0xFFFEFEFE);
-  static const Color glassOverlayColor = Color(0x40FFFFFF);
   static const Color modernCardColor = Color(0xFFFBFBFB);
   static const Color dividerColor = Color(0xFFE2E8F0);
 
   static const double buttonHeight = 56.0;
   static const double buttonHeightLarge = 64.0;
-  static const double buttonHeightSmall = 48.0;
   static const double borderRadius = 20.0;
-  static const double borderRadiusSmall = 16.0;
   static const double borderRadiusLarge = 28.0;
   static const double borderRadiusXLarge = 32.0;
   static const double padding = 16.0;
@@ -33,14 +34,8 @@ class AppConstants {
   static const double paddingLarge = 24.0;
   static const double paddingXLarge = 32.0;
   static const double elevation = 12.0;
-  static const double elevationSmall = 6.0;
-  static const double elevationLarge = 20.0;
 
   static const String loadingMessage = 'กำลังประมวลผล...';
-  static const String cameraPermissionMessage = 'กรุณาอนุญาตให้เข้าถึงกล้อง';
-  static const String storagePermissionMessage = 'กรุณาอนุญาตให้เข้าถึงไฟล์';
-  static const String realtimeComingSoon =
-      'ฟีเจอร์ Real-time Detection\nกำลังพัฒนา...';
 
   static LinearGradient get primaryGradient => const LinearGradient(
         begin: Alignment.topLeft,
@@ -67,7 +62,7 @@ class AppConstants {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [
-          glassOverlayColor,
+          Colors.white.withOpacity(0.25),
           Colors.white.withOpacity(0.1),
         ],
       );
@@ -79,6 +74,13 @@ class AppConstants {
           modernCardColor,
           Color(0xFFF8F9FA),
         ],
+      );
+
+  static LinearGradient get successGradient => const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [successColor, Color(0xFF059669)],
+        stops: [0.0, 1.0],
       );
 
   static BoxShadow get modernShadow => BoxShadow(

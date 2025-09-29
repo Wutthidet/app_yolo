@@ -58,6 +58,38 @@ class OcrService {
   static final TextRecognizer _textRecognizer =
       TextRecognizer(script: TextRecognitionScript.latin);
 
+  static Future<bool> initialize() async {
+    try {
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> performOcr(Uint8List imageBytes) async {
+    try {
+      final img.Image? image = img.decodeImage(imageBytes);
+      if (image == null) {
+        return [];
+      }
+
+      final String recognizedText = await _recognizeTextFromImg(image);
+
+      if (recognizedText.isEmpty) {
+        return [];
+      }
+
+      return [
+        {
+          'text': recognizedText,
+          'confidence': 1.0,
+        }
+      ];
+    } catch (e) {
+      return [];
+    }
+  }
+
   static Future<String> recognizeTextFromImage(String base64Image) async {
     try {
       final Uint8List imageBytes = base64Decode(base64Image);

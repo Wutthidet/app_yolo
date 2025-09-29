@@ -3,6 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as img;
 import 'dart:io';
 import 'dart:convert';
+import 'dart:developer' as developer;
 
 class CameraService {
   static CameraController? _controller;
@@ -87,7 +88,9 @@ class CameraService {
         final fixedBytes = img.encodeJpg(image, quality: 85);
         return base64Encode(fixedBytes);
       }
-    } catch (e) {}
+    } catch (e) {
+      developer.log('Failed to fix image orientation: $e', name: 'CameraService');
+    }
 
     return base64String;
   }

@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:convert';
 import 'package:app_yolo/models/image_data.dart';
 import 'package:app_yolo/screens/simple_preview_screen.dart';
@@ -184,8 +186,8 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen>
             child: Padding(
               padding: const EdgeInsets.all(AppConstants.padding),
               child: IconButton(
-                onPressed: () => Navigator.of(context)
-                    .popUntil((route) => route.isFirst),
+                onPressed: () =>
+                    Navigator.of(context).popUntil((route) => route.isFirst),
                 icon: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(

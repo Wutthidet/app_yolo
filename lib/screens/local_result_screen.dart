@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:app_yolo/models/image_data.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
@@ -27,7 +29,6 @@ class _LocalResultScreenState extends State<LocalResultScreen>
   late AnimationController _scaleController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
-  late Animation<double> _scaleAnimation;
   img.Image? _originalImage;
 
   @override
@@ -60,9 +61,6 @@ class _LocalResultScreenState extends State<LocalResultScreen>
     ).animate(
         CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic));
 
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _scaleController, curve: Curves.elasticOut),
-    );
 
     _fadeController.forward();
     _slideController.forward();
@@ -148,6 +146,65 @@ class _LocalResultScreenState extends State<LocalResultScreen>
     return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
+  void _showFullResultDialog(String title, String details) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: AppConstants.modernBorderRadius,
+        ),
+        backgroundColor: AppConstants.glassSurfaceColor,
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                gradient: AppConstants.accentGradient,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.info_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Text(
+            details,
+            style: const TextStyle(
+                color: AppConstants.textSecondaryColor, height: 1.6),
+          ),
+        ),
+        actions: [
+          Container(
+            decoration: BoxDecoration(
+              gradient: AppConstants.primaryGradient,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [AppConstants.modernShadow],
+            ),
+            child: TextButton(
+              onPressed: () => Navigator.pop(context),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text('ปิด'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -158,30 +215,328 @@ class _LocalResultScreenState extends State<LocalResultScreen>
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              AppConstants.successColor.withOpacity(0.05),
+              AppConstants.accentColor.withOpacity(0.02),
               AppConstants.backgroundColor,
-              AppConstants.accentColor.withOpacity(0.03),
+              AppConstants.primaryColor.withOpacity(0.02),
             ],
           ),
         ),
-        child: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              expandedHeight: 200,
-              floating: false,
-              pinned: true,
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              leading: Container(
-                margin: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  gradient: AppConstants.glassMorphGradient,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.2),
-                    width: 1,
+        child: Stack(
+          children: [
+            CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  expandedHeight: 280,
+                  floating: false,
+                  pinned: true,
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  automaticallyImplyLeading: false,
+                  flexibleSpace: FlexibleSpaceBar(
+                    background: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            AppConstants.accentColor.withOpacity(0.05),
+                            AppConstants.primaryColor.withOpacity(0.05),
+                          ],
+                        ),
+                      ),
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(24),
+                                    decoration: BoxDecoration(
+                                      gradient: AppConstants.accentGradient,
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: AppConstants.accentColor.withOpacity(0.4),
+                                          blurRadius: 24,
+                                          offset: const Offset(0, 8),
+                                        ),
+                                      ],
+                                    ),
+                                    child: const Icon(
+                                      Icons.memory_rounded,
+                                      size: 48,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 24,
+                                      vertical: 12,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.95),
+                                      borderRadius: BorderRadius.circular(24),
+                                      border: Border.all(
+                                        color: AppConstants.accentColor.withOpacity(0.2),
+                                      ),
+                                      boxShadow: [AppConstants.modernShadow],
+                                    ),
+                                    child: const Text(
+                                      'ผลการวิเคราะห์ (Local)',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppConstants.textColor,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  boxShadow: [AppConstants.modernShadow],
+                ),
+                SliverToBoxAdapter(
+                  child: FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: SlideTransition(
+                      position: _slideAnimation,
+                      child: Container(
+                        margin: const EdgeInsets.only(top: 20),
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingLarge),
+                              child: Container(
+                                padding: const EdgeInsets.all(AppConstants.paddingLarge),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      Colors.white,
+                                      Colors.white.withOpacity(0.8),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(24),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.08),
+                                      blurRadius: 24,
+                                      offset: const Offset(0, 8),
+                                      spreadRadius: -4,
+                                    ),
+                                  ],
+                                  border: Border.all(
+                                    color: AppConstants.accentColor.withOpacity(0.1),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(16),
+                                      decoration: BoxDecoration(
+                                        gradient: AppConstants.accentGradient,
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: AppConstants.accentColor.withOpacity(0.4),
+                                            blurRadius: 16,
+                                            offset: const Offset(0, 4),
+                                          ),
+                                        ],
+                                      ),
+                                      child: const Icon(
+                                        Icons.check_circle_rounded,
+                                        color: Colors.white,
+                                        size: 24,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            'ประมวลผลสำเร็จ',
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w700,
+                                              color: AppConstants.textColor,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Row(
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(
+                                                  horizontal: 8,
+                                                  vertical: 2,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: AppConstants.accentColor.withOpacity(0.1),
+                                                  borderRadius: BorderRadius.circular(8),
+                                                ),
+                                                child: Text(
+                                                  'เวลา: ${_formatTime(widget.timestamp)}',
+                                                  style: const TextStyle(
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: AppConstants.accentColor,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            Container(
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: AppConstants.paddingLarge,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(32),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.06),
+                                    blurRadius: 32,
+                                    offset: const Offset(0, 16),
+                                    spreadRadius: -8,
+                                  ),
+                                ],
+                                border: Border.all(
+                                  color: AppConstants.accentColor.withOpacity(0.1),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Column(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 20,
+                                      horizontal: 24,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      gradient: AppConstants.accentGradient,
+                                      borderRadius: const BorderRadius.vertical(
+                                        top: Radius.circular(32),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(8),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withOpacity(0.2),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.memory_rounded,
+                                            color: Colors.white,
+                                            size: 20,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Text(
+                                          'ตรวจพบ ${widget.detectionResults.length} วัตถุ',
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w700,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.all(20),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(20),
+                                      child: Container(
+                                        height: 320,
+                                        width: double.infinity,
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            colors: [
+                                              AppConstants.backgroundColor,
+                                              AppConstants.backgroundColor.withOpacity(0.8),
+                                            ],
+                                          ),
+                                        ),
+                                        child: _originalImage == null
+                                            ? const Center(
+                                                child: CircularProgressIndicator())
+                                            : LayoutBuilder(
+                                                builder: (context, constraints) {
+                                                return Stack(
+                                                  children: [
+                                                    Image.memory(
+                                                      widget.imageData.bytes,
+                                                      fit: BoxFit.cover,
+                                                      width: double.infinity,
+                                                      height: double.infinity,
+                                                    ),
+                                                    CustomPaint(
+                                                      size: Size(
+                                                        constraints.maxWidth,
+                                                        constraints.maxHeight,
+                                                      ),
+                                                      painter: DetectionPainter(
+                                                        results: widget.detectionResults,
+                                                        originalImageSize: Size(
+                                                          _originalImage!.width.toDouble(),
+                                                          _originalImage!.height.toDouble(),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                );
+                                              }),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 32),
+                            _buildResultsList(),
+                            const SizedBox(height: 120),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 16,
+              left: 20,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.9),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: IconButton(
                   onPressed: () {
@@ -194,239 +549,28 @@ class _LocalResultScreenState extends State<LocalResultScreen>
                   ),
                 ),
               ),
-              actions: [
-                Container(
-                  margin: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    gradient: AppConstants.accentGradient,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppConstants.accentColor.withOpacity(0.4),
-                        blurRadius: 12,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: IconButton(
-                    onPressed: () => _showSaveDialog(context),
-                    icon: const Icon(
-                      Icons.save_outlined,
-                      color: Colors.white,
-                      size: 24,
-                    ),
-                  ),
-                ),
-              ],
-              flexibleSpace: FlexibleSpaceBar(
-                title: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    gradient: AppConstants.secondaryGradient,
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [AppConstants.glassShadow],
-                  ),
-                  child: const Text(
-                    'ผลการวิเคราะห์ (Local)',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                centerTitle: true,
-                background: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        AppConstants.successColor.withOpacity(0.1),
-                        Colors.transparent,
-                      ],
-                    ),
-                  ),
-                  child: Center(
-                    child: Icon(
-                      Icons.check_circle_outline_rounded,
-                      size: 80,
-                      color: AppConstants.successColor.withOpacity(0.2),
-                    ),
-                  ),
-                ),
-              ),
             ),
-            SliverToBoxAdapter(
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: SlideTransition(
-                  position: _slideAnimation,
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppConstants.paddingLarge),
-                    child: Column(
-                      children: [
-                        ScaleTransition(
-                          scale: _scaleAnimation,
-                          child: Container(
-                            width: double.infinity,
-                            padding:
-                                const EdgeInsets.all(AppConstants.paddingLarge),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  AppConstants.successColor.withOpacity(0.1),
-                                  AppConstants.accentColor.withOpacity(0.05),
-                                ],
-                              ),
-                              borderRadius: AppConstants.largeBorderRadius,
-                              border: Border.all(
-                                color:
-                                    AppConstants.successColor.withOpacity(0.3),
-                                width: 1,
-                              ),
-                              boxShadow: [AppConstants.modernShadow],
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    gradient: AppConstants.accentGradient,
-                                    shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: AppConstants.accentColor
-                                            .withOpacity(0.3),
-                                        blurRadius: 12,
-                                        offset: const Offset(0, 6),
-                                      ),
-                                    ],
-                                  ),
-                                  child: const Icon(
-                                    Icons.check_circle_rounded,
-                                    color: Colors.white,
-                                    size: 28,
-                                  ),
-                                ),
-                                const SizedBox(width: 20),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        'ประมวลผลสำเร็จ',
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w700,
-                                          color: AppConstants.textColor,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Text(
-                                        'เวลา: ${_formatTime(widget.timestamp)}',
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          color:
-                                              AppConstants.textSecondaryColor,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: AppConstants.paddingXLarge),
-                        Container(
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            gradient: AppConstants.modernCardGradient,
-                            borderRadius: AppConstants.largeBorderRadius,
-                            border: Border.all(
-                              color: Colors.white.withOpacity(0.5),
-                              width: 1,
-                            ),
-                            boxShadow: [AppConstants.cardShadow],
-                          ),
-                          child: Column(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(
-                                    AppConstants.paddingLarge),
-                                decoration: BoxDecoration(
-                                  gradient: AppConstants.secondaryGradient,
-                                  borderRadius: const BorderRadius.vertical(
-                                    top: Radius.circular(
-                                        AppConstants.borderRadiusLarge),
-                                  ),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    'ตรวจพบ ${widget.detectionResults.length} วัตถุ',
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                height: 380,
-                                width: double.infinity,
-                                padding: const EdgeInsets.all(
-                                    AppConstants.paddingLarge),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(
-                                      AppConstants.borderRadius),
-                                  child: _originalImage == null
-                                      ? const Center(
-                                          child: CircularProgressIndicator())
-                                      : LayoutBuilder(
-                                          builder: (context, constraints) {
-                                          return Stack(
-                                            children: [
-                                              Image.memory(
-                                                widget.imageData.bytes,
-                                                fit: BoxFit.cover,
-                                                width: double.infinity,
-                                                height: double.infinity,
-                                              ),
-                                              CustomPaint(
-                                                size: Size(
-                                                  constraints.maxWidth,
-                                                  constraints.maxHeight,
-                                                ),
-                                                painter: DetectionPainter(
-                                                  results:
-                                                      widget.detectionResults,
-                                                  originalImageSize: Size(
-                                                    _originalImage!.width
-                                                        .toDouble(),
-                                                    _originalImage!.height
-                                                        .toDouble(),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          );
-                                        }),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 120),
-                      ],
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 16,
+              right: 20,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: AppConstants.accentGradient,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppConstants.accentColor.withOpacity(0.4),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
                     ),
+                  ],
+                ),
+                child: IconButton(
+                  onPressed: () => _showSaveDialog(context),
+                  icon: const Icon(
+                    Icons.save_outlined,
+                    color: Colors.white,
+                    size: 24,
                   ),
                 ),
               ),
@@ -434,75 +578,309 @@ class _LocalResultScreenState extends State<LocalResultScreen>
           ],
         ),
       ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          gradient: AppConstants.modernCardGradient,
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(AppConstants.borderRadiusXLarge),
-          ),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.5),
-            width: 1,
-          ),
-          boxShadow: [AppConstants.floatingShadow],
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(AppConstants.paddingXLarge),
-            child: Column(
+      floatingActionButton: Container(
+        margin: const EdgeInsets.only(bottom: 20),
+        child: FloatingActionButton.extended(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          label: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24,
+              vertical: 16,
+            ),
+            decoration: BoxDecoration(
+              gradient: AppConstants.accentGradient,
+              borderRadius: BorderRadius.circular(32),
+              boxShadow: [
+                BoxShadow(
+                  color: AppConstants.accentColor.withOpacity(0.4),
+                  blurRadius: 16,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  width: 48,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppConstants.dividerColor,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
+                Icon(
+                  Icons.camera_alt_rounded,
+                  color: Colors.white,
+                  size: 20,
                 ),
-                const SizedBox(height: AppConstants.paddingLarge),
-                Container(
-                  width: double.infinity,
-                  height: AppConstants.buttonHeightLarge,
-                  decoration: BoxDecoration(
-                    gradient: AppConstants.primaryGradient,
-                    borderRadius: AppConstants.modernBorderRadius,
-                    boxShadow: [AppConstants.buttonShadow],
-                  ),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: AppConstants.modernBorderRadius,
-                      ),
-                    ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.camera_alt_rounded,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                        SizedBox(width: 12),
-                        Text(
-                          'ถ่ายรูปใหม่',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
+                SizedBox(width: 8),
+                Text(
+                  'ถ่ายรูปใหม่',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
                   ),
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
+  }
+
+  Widget _buildResultsList() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: AppConstants.paddingLarge),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 16,
+            ),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppConstants.accentColor.withOpacity(0.1),
+                  AppConstants.primaryColor.withOpacity(0.1),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: AppConstants.accentColor.withOpacity(0.2),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    gradient: AppConstants.accentGradient,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.list_alt_rounded,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  'รายละเอียดผลลัพธ์',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: AppConstants.textColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          if (widget.detectionResults.isEmpty)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(32),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: AppConstants.dividerColor,
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppConstants.textSecondaryColor.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.search_off_rounded,
+                      color: AppConstants.textSecondaryColor,
+                      size: 32,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'ไม่พบวัตถุในภาพ',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppConstants.textSecondaryColor,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: widget.detectionResults.length,
+              itemBuilder: (context, index) {
+                final result = widget.detectionResults[index];
+                return _buildResultCard(result, index);
+              },
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildResultCard(Map<String, dynamic> result, int index) {
+    final String label = result['tag'] ?? 'ไม่ทราบ';
+    final double confidence = result['box']?[4] ?? 0.0;
+    final String details = 'ตำแหน่ง: (${result['box']?[0]?.toStringAsFixed(0)}, ${result['box']?[1]?.toStringAsFixed(0)})\nขนาด: ${((result['box']?[2] ?? 0) - (result['box']?[0] ?? 0)).toStringAsFixed(0)} x ${((result['box']?[3] ?? 0) - (result['box']?[1] ?? 0)).toStringAsFixed(0)}';
+
+    final List<Color> cardColors = [
+      AppConstants.accentColor,
+      AppConstants.primaryColor,
+      AppConstants.secondaryColor,
+    ];
+    final cardColor = cardColors[index % cardColors.length];
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: GestureDetector(
+        onTap: () => _showFullResultDialog(label, details),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: cardColor.withOpacity(0.2),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: cardColor.withOpacity(0.1),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+                spreadRadius: -2,
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [cardColor, cardColor.withOpacity(0.8)],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: cardColor.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.memory_rounded,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            label,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: AppConstants.textColor,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            gradient: AppConstants.successGradient,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${(confidence * 100).toStringAsFixed(0)}%',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppConstants.backgroundColor,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(
+                            Icons.settings_applications_rounded,
+                            color: AppConstants.textSecondaryColor,
+                            size: 16,
+                          ),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Local TensorFlow Lite',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: AppConstants.textSecondaryColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: cardColor.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: cardColor,
+                  size: 14,
+                ),
+              ),
+            ],
           ),
         ),
       ),
