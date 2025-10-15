@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/api_detection_result.dart';
 import '../services/api_service.dart';
-import '../services/multi_model_yolo_service.dart';
+import '../services/yolo_service.dart';
 import '../utils/constants.dart';
 
 class ComparisonScreen extends StatefulWidget {
@@ -89,7 +89,7 @@ class _ComparisonScreenState extends State<ComparisonScreen>
     try {
       final DateTime startTime = DateTime.now();
 
-      await MultiModelYoloService.initializeAllModels();
+      await YoloService.initializeAllModels();
 
       final List<Future> futures = [
         _processApiCpu(),
@@ -97,7 +97,7 @@ class _ComparisonScreenState extends State<ComparisonScreen>
       ];
 
       final apiResults = await Future.wait(futures);
-      final modelComparison = await MultiModelYoloService.compareAllModels(_base64Image!);
+      final modelComparison = await YoloService.compareAllModels(_base64Image!);
 
       final DateTime endTime = DateTime.now();
 

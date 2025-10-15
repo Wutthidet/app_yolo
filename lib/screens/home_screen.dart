@@ -182,11 +182,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 context,
                                 icon: Icons.compare_arrows_rounded,
                                 title: '⚖️ เปรียบเทียบผลลัพธ์',
-                                subtitle: 'ประมวลผล 3 วิธีพร้อมกัน + เปรียบเทียบเวลา',
+                                subtitle:
+                                    'ประมวลผล 3 วิธีพร้อมกัน + เปรียบเทียบเวลา',
                                 gradient: const LinearGradient(
                                   colors: [Colors.orange, Colors.deepOrange],
                                 ),
-                                onTap: () => _navigateTo(const ComparisonScreen()),
+                                onTap: () =>
+                                    _navigateTo(const ComparisonScreen()),
                               ),
                               const SizedBox(height: AppConstants.paddingLarge),
                               _buildMainModeButton(
@@ -197,7 +199,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 gradient: const LinearGradient(
                                   colors: [Colors.deepPurple, Colors.indigo],
                                 ),
-                                onTap: () => _navigateTo(const ModelComparisonScreen()),
+                                onTap: () =>
+                                    _navigateTo(const ModelComparisonScreen()),
                               ),
                               const Spacer(),
                             ],
@@ -274,7 +277,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        padding: const EdgeInsets.all(AppConstants.paddingXLarge),
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.85,
+        ),
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -282,94 +287,113 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
+            Padding(
+              padding: const EdgeInsets.only(top: AppConstants.paddingLarge),
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
             const SizedBox(height: AppConstants.paddingLarge),
-            Text(
-              'เลือกโหมดการประมวลผล',
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineSmall
-                  ?.copyWith(fontWeight: FontWeight.w700),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppConstants.paddingXLarge),
+              child: Text(
+                'เลือกโหมดการประมวลผล',
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineSmall
+                    ?.copyWith(fontWeight: FontWeight.w700),
+              ),
             ),
             const SizedBox(height: AppConstants.paddingLarge),
-            _buildDialogOption(
-              icon: Icons.memory_rounded,
-              title: 'FLOAT32 Model',
-              subtitle: 'โมเดลความแม่นยำสูง (32-bit)',
-              color: Colors.green,
-              onTap: () {
-                Navigator.pop(context);
-                _navigateTo(
-                    const CameraScreen(processingMode: ProcessingMode.localFloat32));
-              },
+            Flexible(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppConstants.paddingXLarge),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildDialogOption(
+                      icon: Icons.memory_rounded,
+                      title: 'FLOAT32 Model',
+                      subtitle: 'โมเดลความแม่นยำสูง (32-bit)',
+                      color: Colors.green,
+                      onTap: () {
+                        Navigator.pop(context);
+                        _navigateTo(const CameraScreen(
+                            processingMode: ProcessingMode.localFloat32));
+                      },
+                    ),
+                    const SizedBox(height: AppConstants.padding),
+                    _buildDialogOption(
+                      icon: Icons.speed_rounded,
+                      title: 'FLOAT16 Model',
+                      subtitle: 'โมเดลสมดุลประสิทธิภาพ (16-bit)',
+                      color: Colors.blue,
+                      onTap: () {
+                        Navigator.pop(context);
+                        _navigateTo(const CameraScreen(
+                            processingMode: ProcessingMode.localFloat16));
+                      },
+                    ),
+                    const SizedBox(height: AppConstants.padding),
+                    _buildDialogOption(
+                      icon: Icons.flash_on_rounded,
+                      title: 'INT8 Model',
+                      subtitle: 'โมเดลประสิทธิภาพสูง (8-bit)',
+                      color: Colors.orange,
+                      onTap: () {
+                        Navigator.pop(context);
+                        _navigateTo(const CameraScreen(
+                            processingMode: ProcessingMode.localInt8));
+                      },
+                    ),
+                    const SizedBox(height: AppConstants.padding),
+                    _buildDialogOption(
+                      icon: Icons.cloud_rounded,
+                      title: 'API_CPU (เซิร์เวอร์)',
+                      subtitle: 'ประมวลผลด้วย CPU',
+                      color: Colors.blue,
+                      onTap: () {
+                        Navigator.pop(context);
+                        _navigateTo(const CameraScreen(
+                            processingMode: ProcessingMode.api));
+                      },
+                    ),
+                    const SizedBox(height: AppConstants.padding),
+                    _buildDialogOption(
+                      icon: Icons.rocket_launch_rounded,
+                      title: 'API_GPU (เซิร์ฟเวอร์)',
+                      subtitle: 'ประมวลผลด้วย GPU',
+                      color: Colors.purple,
+                      onTap: () {
+                        Navigator.pop(context);
+                        _navigateTo(const CameraScreen(
+                            processingMode: ProcessingMode.apiGpu));
+                      },
+                    ),
+                    const SizedBox(height: AppConstants.padding),
+                    _buildDialogOption(
+                      icon: Icons.login_rounded,
+                      title: 'Local + Login',
+                      subtitle: 'ต้องเข้าสู่ระบบก่อน ประมวลผล',
+                      color: Colors.orange,
+                      onTap: () {
+                        Navigator.pop(context);
+                        _navigateTo(const LoginScreen());
+                      },
+                    ),
+                    const SizedBox(height: AppConstants.paddingLarge),
+                  ],
+                ),
+              ),
             ),
-            const SizedBox(height: AppConstants.padding),
-            _buildDialogOption(
-              icon: Icons.speed_rounded,
-              title: 'FLOAT16 Model',
-              subtitle: 'โมเดลสมดุลประสิทธิภาพ (16-bit)',
-              color: Colors.blue,
-              onTap: () {
-                Navigator.pop(context);
-                _navigateTo(
-                    const CameraScreen(processingMode: ProcessingMode.localFloat16));
-              },
-            ),
-            const SizedBox(height: AppConstants.padding),
-            _buildDialogOption(
-              icon: Icons.flash_on_rounded,
-              title: 'INT8 Model',
-              subtitle: 'โมเดลประสิทธิภาพสูง (8-bit)',
-              color: Colors.orange,
-              onTap: () {
-                Navigator.pop(context);
-                _navigateTo(
-                    const CameraScreen(processingMode: ProcessingMode.localInt8));
-              },
-            ),
-            const SizedBox(height: AppConstants.padding),
-            _buildDialogOption(
-              icon: Icons.cloud_rounded,
-              title: 'API_CPU (เซิร์เวอร์)',
-              subtitle: 'ประมวลผลด้วย CPU',
-              color: Colors.blue,
-              onTap: () {
-                Navigator.pop(context);
-                _navigateTo(
-                    const CameraScreen(processingMode: ProcessingMode.api));
-              },
-            ),
-            const SizedBox(height: AppConstants.padding),
-            _buildDialogOption(
-              icon: Icons.rocket_launch_rounded,
-              title: 'API_GPU (เซิร์ฟเวอร์)',
-              subtitle: 'ประมวลผลด้วย GPU',
-              color: Colors.purple,
-              onTap: () {
-                Navigator.pop(context);
-                _navigateTo(
-                    const CameraScreen(processingMode: ProcessingMode.apiGpu));
-              },
-            ),
-            const SizedBox(height: AppConstants.padding),
-            _buildDialogOption(
-              icon: Icons.login_rounded,
-              title: 'Local + Login',
-              subtitle: 'ต้องเข้าสู่ระบบก่อน ประมวลผล',
-              color: Colors.orange,
-              onTap: () {
-                Navigator.pop(context);
-                _navigateTo(const LoginScreen());
-              },
-            ),
-            const SizedBox(height: AppConstants.paddingLarge),
           ],
         ),
       ),

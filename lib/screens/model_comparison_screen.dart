@@ -3,7 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import '../services/multi_model_yolo_service.dart';
+import '../services/yolo_service.dart';
 import '../utils/constants.dart';
 
 class ModelComparisonScreen extends StatefulWidget {
@@ -44,7 +44,7 @@ class _ModelComparisonScreenState extends State<ModelComparisonScreen>
   @override
   void dispose() {
     _fadeController.dispose();
-    MultiModelYoloService.disposeAllModels();
+    YoloService.disposeAllModels();
     super.dispose();
   }
 
@@ -53,7 +53,7 @@ class _ModelComparisonScreenState extends State<ModelComparisonScreen>
       _isInitializing = true;
     });
 
-    final success = await MultiModelYoloService.initializeAllModels();
+    final success = await YoloService.initializeAllModels();
 
     setState(() {
       _isInitializing = false;
@@ -96,7 +96,7 @@ class _ModelComparisonScreenState extends State<ModelComparisonScreen>
 
   Future<void> _processComparison() async {
     if (_base64Image == null) return;
-    if (!MultiModelYoloService.areAllModelsInitialized) {
+    if (!YoloService.areAllModelsInitialized) {
       _showErrorDialog('โมเดลยังไม่พร้อม กรุณารอสักครู่');
       return;
     }
@@ -106,7 +106,7 @@ class _ModelComparisonScreenState extends State<ModelComparisonScreen>
     });
 
     try {
-      final result = await MultiModelYoloService.compareAllModels(_base64Image!);
+      final result = await YoloService.compareAllModels(_base64Image!);
 
       setState(() {
         _results = result;
@@ -503,10 +503,10 @@ class _ModelComparisonScreenState extends State<ModelComparisonScreen>
         return Padding(
           padding: const EdgeInsets.only(bottom: AppConstants.padding),
           child: _buildModelProgressCard(
-            MultiModelYoloService.getModelDisplayName(modelType),
-            MultiModelYoloService.getModelDescription(modelType),
+            YoloService.getModelDisplayName(modelType),
+            YoloService.getModelDescription(modelType),
             Icons.memory_rounded,
-            MultiModelYoloService.getModelColor(modelType),
+            YoloService.getModelColor(modelType),
             true,
           ),
         );
@@ -604,11 +604,11 @@ class _ModelComparisonScreenState extends State<ModelComparisonScreen>
         const SizedBox(height: AppConstants.paddingLarge),
         _buildSummaryCard(),
         const SizedBox(height: AppConstants.paddingLarge),
-        _buildModelCard('INT8 Model', _results!.int8Result, MultiModelYoloService.getModelColor(ModelType.int8)),
+        _buildModelCard('INT8 Model', _results!.int8Result, YoloService.getModelColor(ModelType.int8)),
         const SizedBox(height: AppConstants.padding),
-        _buildModelCard('FLOAT16 Model', _results!.float16Result, MultiModelYoloService.getModelColor(ModelType.float16)),
+        _buildModelCard('FLOAT16 Model', _results!.float16Result, YoloService.getModelColor(ModelType.float16)),
         const SizedBox(height: AppConstants.padding),
-        _buildModelCard('FLOAT32 Model', _results!.float32Result, MultiModelYoloService.getModelColor(ModelType.float32)),
+        _buildModelCard('FLOAT32 Model', _results!.float32Result, YoloService.getModelColor(ModelType.float32)),
       ],
     );
   }
@@ -663,7 +663,7 @@ class _ModelComparisonScreenState extends State<ModelComparisonScreen>
           if (fastestResult != null) ...[
             const SizedBox(height: 8),
             Text(
-              'เร็วที่สุด: ${MultiModelYoloService.getModelDisplayName(fastestResult.modelType)} (${fastestResult.processingTime.inMilliseconds} ms)',
+              'เร็วที่สุด: ${YoloService.getModelDisplayName(fastestResult.modelType)} (${fastestResult.processingTime.inMilliseconds} ms)',
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 14,
